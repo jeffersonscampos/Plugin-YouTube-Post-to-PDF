@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Plugin YouTube Post to PDF",
+  "version": "1.0.0",
+  "description": "Transform YouTube Community carousel posts into organized PDF documents.",
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "YouTube Post to PDF"
+  },
+  "permissions": [
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": [
+    "*://*.youtube.com/*"
+  ]
+}

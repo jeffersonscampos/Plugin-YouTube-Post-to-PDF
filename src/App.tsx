@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Upload, 
@@ -32,14 +32,37 @@ export default function App() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
   const [postTitle, setPostTitle] = useState('youtube-carousel-post');
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isExtension, setIsExtension] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const getApiUrl = (path: string) => {
+    const baseUrl = process.env.APP_URL || '';
+    // If it's a relative path and we have a base URL, combine them
+    if (path.startsWith('/') && baseUrl) {
+      return `${baseUrl.replace(/\/$/, '')}${path}`;
+    }
+    return path;
+  };
+
+  useEffect(() => {
+    // Detect if running as Chrome Extension
+    if (typeof chrome !== 'undefined' && chrome.tabs && chrome.tabs.query) {
+      setIsExtension(true);
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        const currentTab = tabs[0];
+        if (currentTab?.url && currentTab.url.includes('youtube.com')) {
+          setYoutubeUrl(currentTab.url);
+        }
+      });
+    }
+  }, []);
 
   const handleCapture = async () => {
     if (!youtubeUrl) return;
     setIsCapturing(true);
 
     try {
-      const response = await fetch('/api/capture', {
+      const response = await fetch(getApiUrl('/api/capture'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: youtubeUrl }),
@@ -57,7 +80,7 @@ export default function App() {
       const newSlides: CarouselSlide[] = data.images.map((imgUrl: string) => ({
         id: Math.random().toString(36).substring(7),
         file: new File([], 'youtube-image.jpg'), // Placeholder
-        preview: `/api/proxy-image?url=${encodeURIComponent(imgUrl)}`,
+        preview: getApiUrl(`/api/proxy-image?url=${encodeURIComponent(imgUrl)}`),
         extractedText: data.text, // Use the post text for all slides initially
         status: 'completed', // Already have text and image
       }));
@@ -223,7 +246,12 @@ export default function App() {
               <FileText className="text-white w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">YouTube Post to PDF</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold tracking-tight">YouTube Post to PDF</h1>
+                {isExtension && (
+                  <span className="bg-red-100 text-red-600 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">Extension</span>
+                )}
+              </div>
               <p className="text-xs text-neutral-500 font-medium">Transform community posts into documents</p>
             </div>
           </div>

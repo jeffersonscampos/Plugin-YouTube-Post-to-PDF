@@ -1,5 +1,5 @@
 {
-  "name": "Remix: YouTube Post to PDF",
-  "description": "Transform YouTube Community carousel posts into organized PDF documents using AI text extraction.",
+  "name": "Plugin YouTube Post to PDF",
+  "description": "Transform YouTube Community carousel posts into organized PDF documents using AI. Now available as a Chrome Extension!",
   "requestFramePermissions": []
 }
